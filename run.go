@@ -44,7 +44,7 @@ func runOne(bin, tests string) {
 	run(`roachtest`,
 		`run`, `-u`, `peter`, tests,
 		`--artifacts=`+tmp,
-		`--workload=bin.docker_amd64/workload`,
+		`--workload=bin/workload`,
 		`--cockroach=`+bin,
 		`--cluster-id=1`)
 
