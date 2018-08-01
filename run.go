@@ -4,7 +4,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -17,8 +16,6 @@ var runCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Run:   runRun,
 }
-
-var statsPathRE = regexp.MustCompile(`artifacts/(.*/[0-9]+\.logs/stats\.json)$`)
 
 func runOne(bin, tests string) {
 	base := filepath.Base(bin)
