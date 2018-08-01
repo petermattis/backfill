@@ -80,7 +80,7 @@ func runRun(cmd *cobra.Command, args []string) {
 		log.Fatal(err)
 	}
 	for i, b := range bins {
-		if i >= count {
+		if count > 0 && i >= count {
 			break
 		}
 		runOne(b, args[0])
