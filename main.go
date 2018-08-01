@@ -9,6 +9,7 @@ import (
 var (
 	artifacts string
 	binDir    string
+	count     int
 	dryRun    bool
 )
 
@@ -32,6 +33,8 @@ func main() {
 		cmd.Flags().StringVarP(
 			&binDir, "bin-dir", "b", os.ExpandEnv("${HOME}/binaries"),
 			"directory to store binaries")
+		cmd.Flags().IntVarP(
+			&count, "count", "c", 0, "maximum number of test runs to perform")
 		cmd.Flags().BoolVarP(
 			&dryRun, "dry-run", "n", dryRun, "dry run (don't build binaries or run tests)")
 	}

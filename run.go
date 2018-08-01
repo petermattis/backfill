@@ -41,7 +41,7 @@ func runOne(bin, tests string) {
 		os.RemoveAll(tmp)
 	}()
 
-	run(`roachtest`,
+	run(`bin/roachtest`,
 		`run`, `-u`, `peter`, tests,
 		`--artifacts=`+tmp,
 		`--workload=bin/workload`,
@@ -79,7 +79,10 @@ func runRun(cmd *cobra.Command, args []string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	for _, b := range bins {
+	for i, b := range bins {
+		if i >= count {
+			break
+		}
 		runOne(b, args[0])
 	}
 }
