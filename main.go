@@ -11,6 +11,7 @@ var (
 	binDir    string
 	count     int
 	dryRun    bool
+	from      string
 	username  string
 )
 
@@ -56,6 +57,8 @@ func main() {
 			"directory to store binaries")
 		cmd.Flags().IntVarP(
 			&count, "count", "c", 0, "maximum number of test runs to perform")
+		cmd.Flags().StringVarP(
+			&from, "from", "f", "", "start date (YYYY-MM-DD) for backfill")
 		cmd.Flags().BoolVarP(
 			&dryRun, "dry-run", "n", dryRun, "dry run (don't build binaries or run tests)")
 	}

@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/spf13/cobra"
 )
@@ -54,10 +55,30 @@ func runRun(cmd *cobra.Command, args []string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	for i, b := range bins {
-		if count > 0 && i >= count {
-			break
+
+	if from != "" {
+		t, err := time.Parse("2006-01-02", from)
+		if err != nil {
+			log.Fatal(err)
 		}
+		from = "cockroach-" + t.Format("20060102") + "-"
+	}
+
+	for _, b := range bins {
+		if from != "" {
+			base := filepath.Base(b)
+			if base < from {
+				continue
+			}
+		}
+
 		runOne(b, args[0])
+
+		if count > 0 {
+			count--
+			if count == 0 {
+				break
+			}
+		}
 	}
 }
