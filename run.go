@@ -1,7 +1,6 @@
 package main
 
 import (
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -33,14 +32,7 @@ func runOne(bin, tests string) {
 		return
 	}
 
-	tmp, err := ioutil.TempDir(artifacts, date+".tmp.")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer func() {
-		os.RemoveAll(tmp)
-	}()
-
+	tmp := dest + ".tmp"
 	run(`bin/roachtest`,
 		`run`, `-u`, `peter`, tests,
 		`--artifacts=`+tmp,
@@ -48,24 +40,7 @@ func runOne(bin, tests string) {
 		`--cockroach=`+bin,
 		`--cluster-id=1`)
 
-	err = filepath.Walk(tmp, func(path string, info os.FileInfo, err error) error {
-		if !info.Mode().IsRegular() {
-			return nil
-		}
-		m := statsPathRE.FindStringSubmatch(path)
-		if m == nil {
-			return nil
-		}
-		destPath := filepath.Join(dest, m[1])
-		if err := os.MkdirAll(filepath.Dir(destPath), 0755); err != nil {
-			log.Fatal(err)
-		}
-		if err := os.Rename(path, destPath); err != nil {
-			log.Fatal(err)
-		}
-		return nil
-	})
-	if err != nil {
+	if err := os.Rename(tmp, dest); err != nil {
 		log.Fatal(err)
 	}
 }
