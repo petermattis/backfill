@@ -31,14 +31,17 @@ func runOne(bin, tests string) {
 
 	tmp := dest + ".tmp"
 	run(`bin/roachtest`,
-		`run`, `-u`, `peter`, tests,
+		`run`, tests,
 		`--artifacts=`+tmp,
-		`--workload=bin/workload`,
+		`--cluster-id=1`,
 		`--cockroach=`+bin,
-		`--cluster-id=1`)
+		`--workload=bin/workload`,
+		`--user=`+username)
 
-	if err := os.Rename(tmp, dest); err != nil {
-		log.Fatal(err)
+	if !dryRun {
+		if err := os.Rename(tmp, dest); err != nil {
+			log.Fatal(err)
+		}
 	}
 }
 
