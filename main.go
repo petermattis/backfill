@@ -13,6 +13,7 @@ var (
 	dryRun    bool
 	from      string
 	username  string
+	workers   int
 )
 
 var rootCmd = &cobra.Command{
@@ -55,16 +56,18 @@ func main() {
 		cmd.Flags().StringVarP(
 			&binDir, "bin-dir", "b", os.ExpandEnv("${HOME}/binaries"),
 			"directory to store binaries")
-		cmd.Flags().IntVarP(
-			&count, "count", "c", 0, "maximum number of test runs to perform")
 		cmd.Flags().StringVarP(
 			&from, "from", "f", "", "start date (YYYY-MM-DD) for backfill")
 		cmd.Flags().BoolVarP(
 			&dryRun, "dry-run", "n", dryRun, "dry run (don't build binaries or run tests)")
 	}
 
+	runCmd.Flags().IntVarP(
+		&count, "count", "c", 0, "maximum number of test runs to perform")
 	runCmd.Flags().StringVarP(
 		&username, "user", "u", username, "username to run under, detect if blank")
+	runCmd.Flags().IntVarP(
+		&workers, "workers", "w", 1, "number of concurrent roachtest workers")
 
 	if err := rootCmd.Execute(); err != nil {
 		// Cobra has already printed the error message.

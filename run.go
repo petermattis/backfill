@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -66,6 +67,22 @@ func runRun(cmd *cobra.Command, args []string) {
 		from = "cockroach-" + t.Format("20060102") + "-"
 	}
 
+	ch := make(chan string, workers)
+	var wg sync.WaitGroup
+	wg.Add(workers)
+	for i := 0; i < workers; i++ {
+		go func() {
+			defer wg.Done()
+			for {
+				b, ok := <-ch
+				if !ok {
+					return
+				}
+				runOne(b, args[0])
+			}
+		}()
+	}
+
 	for _, b := range bins {
 		if from != "" {
 			base := filepath.Base(b)
@@ -74,7 +91,7 @@ func runRun(cmd *cobra.Command, args []string) {
 			}
 		}
 
-		runOne(b, args[0])
+		ch <- b
 
 		if count > 0 {
 			count--
@@ -83,4 +100,7 @@ func runRun(cmd *cobra.Command, args []string) {
 			}
 		}
 	}
+
+	close(ch)
+	wg.Wait()
 }

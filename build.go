@@ -15,10 +15,9 @@ import (
 )
 
 var buildCmd = &cobra.Command{
-	Use:   "build [from <YYYY-MM-DD>]",
+	Use:   "build",
 	Short: "build binaries",
 	Long:  ``,
-	Args:  cobra.RangeArgs(0, 1),
 	Run:   runBuild,
 }
 
@@ -130,10 +129,10 @@ func runBuild(_ *cobra.Command, args []string) {
 		log.Fatal(err)
 	}
 
-	from := time.Date(2018, 4, 1, 0, 0, 0, 0, time.Local)
-	if len(args) > 0 {
+	fromT := time.Date(2018, 4, 1, 0, 0, 0, 0, time.Local)
+	if from != "" {
 		var err error
-		from, err = time.Parse("2006-01-02", args[0])
+		fromT, err = time.Parse("2006-01-02", from)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -143,7 +142,7 @@ func runBuild(_ *cobra.Command, args []string) {
 		log.Fatal(err)
 	}
 
-	for _, target := range getTargets(from) {
+	for _, target := range getTargets(fromT) {
 		buildOne(target)
 	}
 }
