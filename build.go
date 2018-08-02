@@ -68,15 +68,20 @@ func getTargets(from time.Time) []target {
 	return results
 }
 
-func run(args ...string) {
+func run(args ...string) error {
 	fmt.Printf("> %s\n", strings.Join(args, " "))
 	if !dryRun {
 		cmd := exec.Command(args[0], args[1:]...)
 		cmd.Stderr = os.Stderr
 		cmd.Stdout = os.Stdout
-		if err := cmd.Run(); err != nil {
-			log.Fatal(err)
-		}
+		return cmd.Run()
+	}
+	return nil
+}
+
+func mustRun(args ...string) {
+	if err := run(args...); err != nil {
+		log.Fatal(err)
 	}
 }
 
@@ -96,9 +101,9 @@ func buildOne(target target) {
 	}
 
 	fmt.Printf("building %s\n", path)
-	run("git", "checkout", target.sha)
-	run("git", "clean", "-dxf")
-	run("git", "submodule", "update", "--init", "--force")
+	mustRun("git", "checkout", target.sha)
+	mustRun("git", "clean", "-dxf")
+	mustRun("git", "submodule", "update", "--init", "--force")
 
 	const bin = "cockroach-linux-2.6.32-gnu-amd64"
 	if err := os.Remove(bin); err != nil {
@@ -108,9 +113,9 @@ func buildOne(target target) {
 	}
 
 	if exists("build/builder/mkrelease.sh") {
-		run("build/builder.sh", "mkrelease", "amd64-linux-gnu")
+		mustRun("build/builder.sh", "mkrelease", "amd64-linux-gnu")
 	} else {
-		run("build/builder.sh", "make", "build", "TYPE=release-linux-gnu")
+		mustRun("build/builder.sh", "make", "build", "TYPE=release-linux-gnu")
 	}
 
 	if exists(bin) {

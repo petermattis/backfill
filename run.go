@@ -31,7 +31,9 @@ func runOne(bin, tests string) {
 	}
 
 	tmp := dest + ".tmp"
-	run(`bin/roachtest`,
+	_ = os.RemoveAll(tmp)
+
+	mustRun(`bin/roachtest`,
 		`run`, tests,
 		`--artifacts=`+tmp,
 		`--cluster-id=1`,
