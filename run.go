@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -19,7 +20,7 @@ var runCmd = &cobra.Command{
 	Run:   runRun,
 }
 
-func runOne(bin, tests string) {
+func runOne(i int, bin, tests string) {
 	base := filepath.Base(bin)
 	parts := strings.Split(base, "-")
 	if len(parts) != 3 {
@@ -37,7 +38,7 @@ func runOne(bin, tests string) {
 	mustRun(`bin/roachtest`,
 		`run`, tests,
 		`--artifacts=`+tmp,
-		`--cluster-id=1`,
+		`--cluster-id=`+fmt.Sprint(i),
 		`--cockroach=`+bin,
 		`--workload=bin/workload`,
 		`--user=`+username)
@@ -71,16 +72,16 @@ func runRun(cmd *cobra.Command, args []string) {
 	var wg sync.WaitGroup
 	wg.Add(workers)
 	for i := 0; i < workers; i++ {
-		go func() {
+		go func(i int) {
 			defer wg.Done()
 			for {
 				b, ok := <-ch
 				if !ok {
 					return
 				}
-				runOne(b, args[0])
+				runOne(i+1, b, args[0])
 			}
-		}()
+		}(i)
 	}
 
 	for _, b := range bins {
