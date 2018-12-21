@@ -39,9 +39,11 @@ func exists(path string) bool {
 	return true
 }
 
-func getTargets(from time.Time) []target {
-	gitLog := `git log --pretty=format:"%ad%x09%H" --merges --since=` +
-		from.Format("2006-01-02") + ` --date=iso-local master | ` +
+func getTargets(from, to time.Time) []target {
+	gitLog := `git log --pretty=format:"%ad%x09%H" --merges` +
+		` --since=` + from.Format("2006-01-02") +
+		` --until=` + to.Format("2006-01-02") +
+		` --date=iso-local master | ` +
 		`awk '{print $NF, $1}' | uniq -f 1`
 	cmd := exec.Command(`/bin/bash`, `-c`, gitLog)
 	out, err := cmd.CombinedOutput()
@@ -128,21 +130,27 @@ func runBuild(_ *cobra.Command, args []string) {
 	if err := os.Chdir(gitTopLevel()); err != nil {
 		log.Fatal(err)
 	}
-
-	fromT := time.Date(2018, 4, 1, 0, 0, 0, 0, time.Local)
-	if from != "" {
-		var err error
-		fromT, err = time.Parse("2006-01-02", from)
+	parseTime := func(timeS string) time.Time {
+		t, err := time.Parse("2006-01-02", timeS)
 		if err != nil {
 			log.Fatal(err)
 		}
+		return t
 	}
-
+	fromT := time.Date(2018, 4, 1, 0, 0, 0, 0, time.Local)
+	if from != "" {
+		fromT = parseTime(from)
+	}
+	// Initialize to to the beginning of yesterday.
+	y, m, d := time.Now().Add(-24 * time.Hour).Date()
+	toT := time.Date(y, m, d, 0, 0, 0, 0, time.Local)
+	if to != "" {
+		toT = parseTime(to)
+	}
 	if err := os.MkdirAll(binDir, 0755); err != nil {
 		log.Fatal(err)
 	}
-
-	for _, target := range getTargets(fromT) {
+	for _, target := range getTargets(fromT, toT) {
 		buildOne(target)
 	}
 }
