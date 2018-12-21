@@ -60,12 +60,19 @@ func runRun(cmd *cobra.Command, args []string) {
 		log.Fatal(err)
 	}
 
-	if from != "" {
-		t, err := time.Parse("2006-01-02", from)
+	binaryPrefixFromTime := func(timeS string) string {
+		t, err := time.Parse("2006-01-02", timeS)
 		if err != nil {
 			log.Fatal(err)
 		}
-		from = "cockroach-" + t.Format("20060102") + "-"
+		return "cockroach-" + t.Format("20060102") + "-"
+	}
+
+	if from != "" {
+		from = binaryPrefixFromTime(from)
+	}
+	if to != "" {
+		to = binaryPrefixFromTime(to)
 	}
 
 	ch := make(chan string, workers)
@@ -89,6 +96,9 @@ func runRun(cmd *cobra.Command, args []string) {
 			base := filepath.Base(b)
 			if base < from {
 				continue
+			}
+			if to != "" && base > to {
+				break
 			}
 		}
 
