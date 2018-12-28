@@ -12,6 +12,7 @@ var (
 	count     int
 	dryRun    bool
 	from      string
+	to        string
 	username  string
 	workers   int
 )
@@ -58,6 +59,8 @@ func main() {
 			"directory to store binaries")
 		cmd.Flags().StringVarP(
 			&from, "from", "f", "", "start date (YYYY-MM-DD) for backfill")
+		cmd.Flags().StringVarP(
+			&to, "to", "t", "", "end date (YYYY-MM-DD) for backfill")
 		cmd.Flags().BoolVarP(
 			&dryRun, "dry-run", "n", dryRun, "dry run (don't build binaries or run tests)")
 	}
